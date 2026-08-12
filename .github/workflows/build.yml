@@ -1,4 +1,4 @@
-name: Build Android APK & AAB
+name: Build Android APK
 
 on:
   push:
@@ -18,26 +18,27 @@ jobs:
         with:
           node-version: 18
 
-      - name: Setup Expo
-        uses: expo/expo-github-action@v8
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
         with:
-          expo-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+          distribution: 'zulu'
+          java-version: '17'
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Install Expo CLI & Dependencies
+        run: |
+          npm install
+          npx expo prebuild --platform android
 
-      - name: Build APK (Preview)
-        run: npx eas-cli build --platform android --profile preview --non-interactive
+      - name: Build Android APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
 
-      - name: Build AAB (Production)
-        run: npx eas-cli build --platform android --profile production --non-interactive
-
-      - name: Upload Artifacts
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: app-release
-          path: |
-            ./*.apk
-            ./*.aab
+          name: CricBattle11-APK
+          path: android/app/build/outputs/apk/release/app-release.apk
+
 
